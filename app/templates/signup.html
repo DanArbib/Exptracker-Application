@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signin.css') }}">
+</head>
+<body>
+    <div class="top">
+        <div class="item">
+            <a href="{{ url_for('login') }}">Login</a>
+        </div>
+    </div>
+    <div class="warper">
+    <div class="main">
+        <form id="signupForm">
+            <div class="wrap">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/logo-400.png') }}" alt="Logo">
+                </div>
+                <div class="title">
+                    Create your account
+                </div>
+                <div class="info">
+                    Enter the fields below to signup
+                </div>
+                <div class="inputs">
+                    <div class="inp">
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="inp">
+                        <input type="password" id="password" name="password" placeholder="Password (6+ characters)" required>
+                    </div>
+                    <div class="inp">
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required>
+                    </div>
+                </div>
+                <div id="error-message" class="error"></div>
+                <button type="submit">Sign up</button>
+                <p class="policy">By clicking “Sign up” you agree to glivs terms of service and acknowledge you have read our privacy policy</p>
+            </div>
+        </form>
+    </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+</body>
+</html>

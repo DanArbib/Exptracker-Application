@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+
+
+    <div class="top">
+
+        <div class="item">
+            <a href="{{ url_for('signup') }}">Sign up</a>
+        </div>
+    </div>
+
+    <div class="warper">
+    <div class="main">
+        <form id="loginForm">
+            <div class="wrap">
+                <div class="logo">
+                    <img src="{{ url_for('static', filename='img/logo-400.png') }}" alt="Logo">
+                </div>
+                <div class="title">
+                    Let's get started
+                </div>
+                <div class="info">
+                    Login to your account
+                </div>
+                <div class="inputs">
+                    <div class="inp">
+                        <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="inp">
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                <div id="error-message" class="error"></div>
+                <button type="submit">Login</button>
+            </div>
+        </form>
+    </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>
