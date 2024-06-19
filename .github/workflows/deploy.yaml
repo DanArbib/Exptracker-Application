@@ -55,15 +55,6 @@ jobs:
           chmod +x ./tests/e2e.sh
           ./tests/healthcheck.sh nginx 30 5
           ./tests/e2e.sh
-        env:
-          FLASK_SECRET_KEY: "test_value"
-          JWT_SECRET_KEY: "test_value"
-          PG_HOST: "test_value"
-          PG_PORT: 5432   
-          POSTGRES_PASSWORD: "test_value"
-          POSTGRES_USER: "test_value"
-          POSTGRES_DB: "test_value"
-          PGDATA: "/var/lib/postgresql/data/db-files/"
 
 
            
