@@ -44,11 +44,7 @@ jobs:
           docker build -f ${{ env.APP_DOCKERFILE }} -t ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} .
           docker build -f ${{ env.NGINX_DOCKERFILE }} -t ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }} .
 
-  e2e_tests:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Setup Environment
+      - name: Setup Testing Environment
         run: |
           mv env.example .env
           sed -i 's/#image_app:.*$/image: ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }}/' docker-compose.yml
@@ -62,12 +58,8 @@ jobs:
           ./tests/healthcheck.sh localhost 30 5
           ./tests/e2e.sh localhost
 
-  versioning:
-    needs: e2e_tests
-    runs-on: ubuntu-latest
-    if: ${{ !inputs.test_only }}
-    steps:
       - name: Determine Version
+        if: ${{ !inputs.test_only }}
         run: |
           commit_msg=$(git log -1 --pretty=%B | tr -d '\n')
           echo "Commit Message: $commit_msg"
@@ -85,7 +77,3 @@ jobs:
           fi
           echo "New version: $new_version"
         shell: bash
-
-      - name: new version
-        run: |
-          echo "New version is ${{ steps.determine_version.outputs.new_version }}"
