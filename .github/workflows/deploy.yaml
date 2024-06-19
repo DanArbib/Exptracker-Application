@@ -7,10 +7,10 @@ on:
         description: "Choose environment"
         type: choice
         options:
-          - Exptracker-dev
-          - Exptracker-prod
+          - dev
+          - prod
         required: true
-        default: exptracker-dev       
+        default: dev    
       version:
         description: "Choose Version"
         type: string
@@ -22,7 +22,7 @@ on:
         required: false
         default: false
 
-run-name: "${{ inputs.image }}:${{ inputs.version }}"
+run-name: "${{ github.workflow }}-${{ inputs.image }}:${{ inputs.version }}"
 
 env:
   ECR_URI: "644435390668.dkr.ecr.ap-south-1.amazonaws.com/dan-exptracker"
