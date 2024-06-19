@@ -86,7 +86,7 @@ pipeline {
                     chmod +x ./tests/healthcheck.sh
                     chmod +x ./tests/e2e.sh
                     ./tests/healthcheck.sh ${NGINX_NAME} 30 5
-                    ./tests/e2e.sh
+                    ./tests/e2e.sh nginx
                 """
             }
             post {

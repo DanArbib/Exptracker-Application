@@ -1,6 +1,11 @@
 #!/bin/bash
 
-flask_url="http://nginx"
+if [ -z "$1" ]; then
+    echo "Usage: $0 <host>"
+    exit 1
+fi
+
+flask_url="http://$1"
 signup_data='{"email": "test2@example.com", "password": "password123"}'
 expense_data='{"amount": 50, "category": "Groceries"}'
 
