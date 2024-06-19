@@ -22,8 +22,7 @@ on:
         required: false
         default: false
 
-run-name: |
-  ${{ inputs.image }}${{ if inputs.test_only == 'true' }}-testing${{ else }}:${{ inputs.version }}${{ endif }}
+run-name: "${{ inputs.image }}:${{ inputs.version }}"
 
 env:
   ECR_URI: "644435390668.dkr.ecr.ap-south-1.amazonaws.com/dan-exptracker"
