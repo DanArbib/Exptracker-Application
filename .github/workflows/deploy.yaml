@@ -41,8 +41,8 @@ jobs:
 
       - name: Build Docker Images
         run: |
-          docker build -f ${{ env.DOCKERFILE_PATH }}/Dockerfile.app -t ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} .
-          docker build -f ${{ env.DOCKERFILE_PATH }}/Dockerfile.nginx -t ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }} .
+          docker build -f ${{ env.APP_DOCKERFILE }} -t ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} .
+          docker build -f ${{ env.NGINX_DOCKERFILE }} -t ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }} .
 
   e2e_tests:
     needs: build
