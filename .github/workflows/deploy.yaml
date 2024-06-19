@@ -25,7 +25,8 @@ on:
 run-name: "${{ github.workflow }} - ${{ inputs.image }}:${{ inputs.version }}"
 
 env:
-  ECR_URI: "644435390668.dkr.ecr.ap-south-1.amazonaws.com/"
+  ECR_URI: "644435390668.dkr.ecr.ap-south-1.amazonaws.com/dan-exptracker"
+  AWS_REGION: "ap-south-1"
   APP_DOCKERFILE: "Dockerfile.app"
   NGINX_DOCKERFILE: "Dockerfile.nginx"
   APP_NAME: "app-${{ inputs.image }}"
@@ -77,3 +78,21 @@ jobs:
           fi
           echo "New version: $new_version"
         shell: bash
+
+      - name: Configure AWS Credentials
+        if: ${{ !inputs.test_only }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Authenticate Docker ECR
+        if: ${{ !inputs.test_only }}
+        run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URI }}
+
+      - name: Tag and Push Image to ECR
+        if: ${{ !inputs.test_only }}
+        run: |
+          docker tag ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} ${{ env.ECR_URI }}:${{ inputs.version }}
+          docker push ${{ env.ECR_URI }}:${{ inputs.version }}
