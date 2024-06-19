@@ -53,7 +53,7 @@ jobs:
           docker compose up -d
           chmod +x ./tests/healthcheck.sh
           chmod +x ./tests/e2e.sh
-          ./tests/healthcheck.sh nginx 30 5
+          ./tests/healthcheck.sh localhost 30 5
           ./tests/e2e.sh
 
 
