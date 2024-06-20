@@ -1,8 +1,7 @@
 name: Exptracker
 
 permissions:
-  packages: write
-  contents: read
+  contents: write
 
 on:
   workflow_dispatch:
