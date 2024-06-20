@@ -121,10 +121,10 @@ jobs:
           path: gitops-repo
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install yq
-        run: sudo apt-get install -y yq
-
       - name: Update Helm Chart
+        uses: actions/setup-yq@v3
+        with:
+          yq_version: '4'
         working-directory: gitops-repo
         run: |
           yq -i '.appVersion = "${{ needs.build.outputs.version }}"' glivs/Chart.yaml
