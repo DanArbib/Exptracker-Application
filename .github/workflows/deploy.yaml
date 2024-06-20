@@ -40,6 +40,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      pr-number: ${{ steps.version.outputs.new_version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -82,7 +84,6 @@ jobs:
             new_version="$major.$minor.$patch"
           fi
           echo "New version: $new_version"
-          echo "::set-output name=version::$new_version"
         shell: bash
 
       # - name: Configure AWS Credentials
@@ -105,7 +106,7 @@ jobs:
 
   deploy:
     if: ${{ !inputs.test_only }}
-    needs: build
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout GitOps Repository
@@ -143,7 +144,7 @@ jobs:
         working-directory: application-repo
         run: |
           git clean -f -x
-          git tag ${{ needs.build.outputs.version }}
-          git push origin ${{ needs.build.outputs.version }}
+          git tag ${{ needs.build.outputs.new_version }}
+          git push origin ${{ needs.build.outputs.new_version }}
 
 
