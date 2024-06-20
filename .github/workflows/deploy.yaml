@@ -44,6 +44,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Download yq
+        run: |
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          chmod +x /usr/bin/yq
+
       - name: Build Docker Images
         run: |
           docker build -f ${{ env.APP_DOCKERFILE }} -t ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} .
@@ -120,10 +125,12 @@ jobs:
           path: gitops-repo
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Download yq
+        run: |
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+          chmod +x /usr/bin/yq
+
       - name: Update Helm Chart
-        uses: actions/setup-yq@v3
-        with:
-          yq_version: '4'
         working-directory: gitops-repo
         run: |
           yq -i '.appVersion = "${{ needs.build.outputs.version }}"' glivs/Chart.yaml
