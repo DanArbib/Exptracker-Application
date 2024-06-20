@@ -114,7 +114,7 @@ jobs:
           repository: ${{ env.GITOPS_REPO }}
           fetch-depth: 0
           ref: 'main'
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Checkout application repository
         uses: actions/checkout@v4
