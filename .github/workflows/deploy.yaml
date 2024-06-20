@@ -22,7 +22,7 @@ on:
         required: false
         default: false
 
-run-name: "${{ github.workflow }}-${{ inputs.image }}:${{ inputs.version }}"
+run-name: "${{ github.workflow }}-${{ inputs.image }}:${{ github.run_number }}"
 
 env:
   ECR_URI: "644435390668.dkr.ecr.ap-south-1.amazonaws.com/dan-exptracker"
@@ -97,8 +97,8 @@ jobs:
       - name: Tag and Push Image to ECR
         if: ${{ !inputs.test_only }}
         run: |
-          docker tag ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} ${{ env.ECR_URI }}:${{ inputs.version }}
-          docker push ${{ env.ECR_URI }}:${{ inputs.version }}
+          docker tag ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
+          docker push ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
 
       - name: Tag Commit
         run: |
@@ -115,7 +115,7 @@ jobs:
       - name: Checkout application repository
         uses: actions/checkout@v4
         with:
-          path: application-rep
+          path: application-repo
 
       - name: Checkout GitOps Repository
         uses: actions/checkout@v4
@@ -144,7 +144,7 @@ jobs:
           git push origin main
 
       - name: Tag Commit
-        working-directory: application-rep
+        working-directory: application-repo
         run: |
           git clean -f -x
           git tag ${{ needs.build.outputs.version }}
