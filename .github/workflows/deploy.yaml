@@ -46,24 +46,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # - name: Build Docker Images
-      #   run: |
-      #     docker build -f ${{ env.APP_DOCKERFILE }} -t ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} .
-      #     docker build -f ${{ env.NGINX_DOCKERFILE }} -t ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }} .
+      - name: Build Docker Images
+        run: |
+          docker build -f ${{ env.APP_DOCKERFILE }} -t ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} .
+          docker build -f ${{ env.NGINX_DOCKERFILE }} -t ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }} .
 
-      # - name: Setup Testing Environment
-      #   run: |
-      #     mv env.example .env
-      #     sed -i 's/#image_app:.*$/image: ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }}/' docker-compose.yml
-      #     sed -i 's/#image_nginx:.*$/image: ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }}/' docker-compose.yml
-      #     docker compose up -d
-      #     chmod +x ./tests/healthcheck.sh
-      #     chmod +x ./tests/e2e.sh
+      - name: Setup Testing Environment
+        run: |
+          mv env.example .env
+          sed -i 's/#image_app:.*$/image: ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }}/' docker-compose.yml
+          sed -i 's/#image_nginx:.*$/image: ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }}/' docker-compose.yml
+          docker compose up -d
+          chmod +x ./tests/healthcheck.sh
+          chmod +x ./tests/e2e.sh
 
-      # - name: Run E2E Tests
-      #   run: |
-      #     ./tests/healthcheck.sh localhost 30 5
-      #     ./tests/e2e.sh localhost
+      - name: Run E2E Tests
+        run: |
+          ./tests/healthcheck.sh localhost 30 5
+          ./tests/e2e.sh localhost
 
       - name: Determine Version
         if: ${{ !inputs.test_only }}
@@ -87,23 +87,23 @@ jobs:
           echo "version=$new_version" >> $GITHUB_OUTPUT
         shell: bash
 
-      # - name: Configure AWS Credentials
-      #   if: ${{ !inputs.test_only }}
-      #   uses: aws-actions/configure-aws-credentials@v2
-      #   with:
-      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      #     aws-region: ${{ env.AWS_REGION }}
+      - name: Configure AWS Credentials
+        if: ${{ !inputs.test_only }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      # - name: Authenticate Docker ECR
-      #   if: ${{ !inputs.test_only }}
-      #   run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URI }}
+      - name: Authenticate Docker ECR
+        if: ${{ !inputs.test_only }}
+        run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URI }}
 
-      # - name: Tag and Push Image to ECR
-      #   if: ${{ !inputs.test_only }}
-      #   run: |
-      #     docker tag ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
-      #     docker push ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
+      - name: Tag and Push Image to ECR
+        if: ${{ !inputs.test_only }}
+        run: |
+          docker tag ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
+          docker push ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
 
   deploy:
     if: ${{ !inputs.test_only }}
