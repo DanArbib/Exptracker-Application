@@ -41,7 +41,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      pr-number: ${{ steps.version.outputs.new_version }}
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,6 +84,7 @@ jobs:
             new_version="$major.$minor.$patch"
           fi
           echo "New version: $new_version"
+          echo "version=$new_version" >> $GITHUB_OUTPUT
         shell: bash
 
       # - name: Configure AWS Credentials
@@ -144,7 +145,7 @@ jobs:
         working-directory: application-repo
         run: |
           git clean -f -x
-          git tag ${{ needs.build.outputs.new_version }}
-          git push origin ${{ needs.build.outputs.new_version }}
+          git tag ${{ needs.build.outputs.version }}
+          git push origin ${{ needs.build.outputs.version }}
 
 
