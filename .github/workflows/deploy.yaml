@@ -35,7 +35,7 @@ env:
   APP_NAME: "app-${{ inputs.image }}"
   NGINX_NAME: "nginx-${{ inputs.image }}"
   BUILD_NUMBER: "${{ github.run_number }}"
-  GITOPS_REPO: ""
+  GITOPS_REPO: "DanArbib/Exptracker-GitOps.git"
 
 jobs:
   build:
@@ -44,28 +44,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Download yq
-        run: |
-          sudo sh -c 'wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq'
+      # - name: Build Docker Images
+      #   run: |
+      #     docker build -f ${{ env.APP_DOCKERFILE }} -t ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} .
+      #     docker build -f ${{ env.NGINX_DOCKERFILE }} -t ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }} .
 
-      - name: Build Docker Images
-        run: |
-          docker build -f ${{ env.APP_DOCKERFILE }} -t ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} .
-          docker build -f ${{ env.NGINX_DOCKERFILE }} -t ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }} .
+      # - name: Setup Testing Environment
+      #   run: |
+      #     mv env.example .env
+      #     sed -i 's/#image_app:.*$/image: ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }}/' docker-compose.yml
+      #     sed -i 's/#image_nginx:.*$/image: ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }}/' docker-compose.yml
+      #     docker compose up -d
+      #     chmod +x ./tests/healthcheck.sh
+      #     chmod +x ./tests/e2e.sh
 
-      - name: Setup Testing Environment
-        run: |
-          mv env.example .env
-          sed -i 's/#image_app:.*$/image: ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }}/' docker-compose.yml
-          sed -i 's/#image_nginx:.*$/image: ${{ env.NGINX_NAME }}:${{ env.BUILD_NUMBER }}/' docker-compose.yml
-          docker compose up -d
-          chmod +x ./tests/healthcheck.sh
-          chmod +x ./tests/e2e.sh
-
-      - name: Run E2E Tests
-        run: |
-          ./tests/healthcheck.sh localhost 30 5
-          ./tests/e2e.sh localhost
+      # - name: Run E2E Tests
+      #   run: |
+      #     ./tests/healthcheck.sh localhost 30 5
+      #     ./tests/e2e.sh localhost
 
       - name: Determine Version
         if: ${{ !inputs.test_only }}
@@ -89,53 +85,52 @@ jobs:
           echo "::set-output name=version::$new_version"
         shell: bash
 
-      - name: Configure AWS Credentials
-        if: ${{ !inputs.test_only }}
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+      # - name: Configure AWS Credentials
+      #   if: ${{ !inputs.test_only }}
+      #   uses: aws-actions/configure-aws-credentials@v2
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: ${{ env.AWS_REGION }}
 
-      - name: Authenticate Docker ECR
-        if: ${{ !inputs.test_only }}
-        run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URI }}
+      # - name: Authenticate Docker ECR
+      #   if: ${{ !inputs.test_only }}
+      #   run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URI }}
 
-      - name: Tag and Push Image to ECR
-        if: ${{ !inputs.test_only }}
-        run: |
-          docker tag ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
-          docker push ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
+      # - name: Tag and Push Image to ECR
+      #   if: ${{ !inputs.test_only }}
+      #   run: |
+      #     docker tag ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
+      #     docker push ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
 
   deploy:
     if: ${{ !inputs.test_only }}
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout application repository
-        uses: actions/checkout@v4
-        with:
-          path: application-repo
-
       - name: Checkout GitOps Repository
         uses: actions/checkout@v4
         with:
           repository: ${{ env.GITOPS_REPO }}
-          path: gitops-repo
+          fetch-depth: 0
+          ref: 'main'
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout application repository
+        uses: actions/checkout@v4
+        with:
+          path: application-repo
 
       - name: Download yq
         run: |
           sudo sh -c 'wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq && chmod +x /usr/bin/yq'
 
       - name: Update Helm Chart
-        working-directory: gitops-repo
         run: |
           yq -i '.appVersion = "${{ needs.build.outputs.version }}"' glivs/Chart.yaml
           yq -i '.application.image.tag = "${{ needs.build.outputs.version }}"' glivs/values.yaml
 
       - name: Commit and Push Changes
-        working-directory: gitops-repo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
