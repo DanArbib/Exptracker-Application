@@ -1,5 +1,9 @@
 name: Exptracker
 
+permissions:
+  packages: write
+  contents: read
+
 on:
   workflow_dispatch:
     inputs:
@@ -99,13 +103,6 @@ jobs:
         run: |
           docker tag ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
           docker push ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
-
-      - name: Tag Commit
-        run: |
-          git clean -f -x
-          git tag ${{ steps.version.outputs.version }}
-          git push origin ${{ steps.version.outputs.version }}
-
 
   deploy:
     if: ${{ !inputs.test_only }}
