@@ -138,8 +138,12 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add glivs/Chart.yaml
           git add glivs/values.yaml
-          git commit -m "App version - ${{ needs.build.outputs.version }}"
-          git push origin main
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to commit"
+          else
+            git commit -m "App version - ${{ needs.build.outputs.version }}"
+            git push origin main
+          fi
 
       - name: Tag Commit
         working-directory: application-repo
