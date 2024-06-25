@@ -24,17 +24,19 @@ on:
         required: false
         default: false
 
-run-name: "${{ github.workflow }}-${{ inputs.image }}:${{ github.run_number }}"
+run-name: "${{ github.workflow }}:${{ github.run_number }}"
 
 env:
   ECR_URI: "644435390668.dkr.ecr.ap-south-1.amazonaws.com/dan-exptracker"
   AWS_REGION: "ap-south-1"
   APP_DOCKERFILE: "Dockerfile.app"
   NGINX_DOCKERFILE: "Dockerfile.nginx"
-  APP_NAME: "app-${{ inputs.image }}"
-  NGINX_NAME: "nginx-${{ inputs.image }}"
+  APP_NAME: "app"
+  NGINX_NAME: "nginx"
   BUILD_NUMBER: "${{ github.run_number }}"
   GITOPS_REPO: "DanArbib/Exptracker-GitOps.git"
+  IMAGE: ${{ github.event.inputs.image || 'dev' }}
+  TEST_ONLY: ${{ github.event.inputs.test_only || 'false' }}
 
 jobs:
   build:
@@ -68,7 +70,7 @@ jobs:
         run: git fetch --prune --unshallow --tags
 
       - name: Determine Version
-        if: ${{ !inputs.test_only }}
+        if: ${{  !env.TEST_ONLY  }}
         id: version
         run: |
           commit_msg=$(git log -1 --pretty=%B | tr -d '\n')
@@ -90,7 +92,7 @@ jobs:
         shell: bash
 
       - name: Configure AWS Credentials
-        if: ${{ !inputs.test_only }}
+        if: ${{  !env.TEST_ONLY  }}
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -98,17 +100,17 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Authenticate Docker ECR
-        if: ${{ !inputs.test_only }}
+        if: ${{  !env.TEST_ONLY  }}
         run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_URI }}
 
       - name: Tag and Push Image to ECR
-        if: ${{ !inputs.test_only }}
+        if: ${{  !env.TEST_ONLY  }}
         run: |
           docker tag ${{ env.APP_NAME }}:${{ env.BUILD_NUMBER }} ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
           docker push ${{ env.ECR_URI }}:${{ steps.version.outputs.version }}
 
   deploy:
-    if: ${{ !inputs.test_only }}
+    if: ${{  !env.TEST_ONLY  }}
     needs: [build]
     runs-on: ubuntu-latest
     steps:
