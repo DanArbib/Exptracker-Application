@@ -65,6 +65,9 @@ jobs:
           ./tests/healthcheck.sh localhost 30 5
           ./tests/e2e.sh localhost
 
+      - name: Fetch tags
+        run: git fetch --prune --unshallow --tags
+
       - name: Determine Version
         if: ${{ !inputs.test_only }}
         id: version
